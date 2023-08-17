@@ -10,6 +10,8 @@ import StudentView from '../views/StudentView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import NetworkErrorView from '../views/NetworkErrorView.vue'
 import NProgress from 'nprogress'
+import EventService from '@/services/EventService'
+import { useEventStore } from '@/stores/event'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,7 +20,7 @@ const router = createRouter({
       path: '/',
       name: 'EventList',
       component: EventListView,
-      props: (route) => ({ page: parseInt((route.query?.page as string) || '1') })
+      props: (route) => ({page: parseInt(route.query?.page as string || '1') })
     },
     {
       path: '/about',
@@ -43,6 +45,26 @@ const router = createRouter({
       name: 'event-layout',
       component: EventLayoutView,
       props: true,
+      beforeEnter: (to) => {
+        const id: number = parseInt(to.params.id as string)
+        const eventStore = useEventStore()
+        return EventService.getEventById(id)
+        .then((response) => {
+          // need to set up the data for the component
+          eventStore.setEvent(response.data)
+        })
+        .catch((error) => {
+          if (error.response && error.response.status === 404) {
+            return {
+              name: '404-resource',
+              params: { resource: 'event' }
+            }
+          }
+            else {
+              return { name: 'network-error' }
+            }
+          })
+      },
       children: [
         {
           path: '',

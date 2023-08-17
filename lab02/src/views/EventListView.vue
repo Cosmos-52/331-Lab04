@@ -25,26 +25,22 @@ const props = defineProps({
 
 const router = useRouter()
 
-EventService.getEvent(2, props.page)
-  .then((response: AxiosResponse<EventItem[]>) => {
-    events.value = response.data
-    totalEvent.value = response.headers['x-total-count']
-  })
-  .catch(() => {
-    router.push({ name: 'NetworkError' })
-  })
+EventService.getEvent(2, props.page).then((response: AxiosResponse<EventItem[]>) => {
+  events.value = response.data
+  totalEvent.value = response.headers['x-total-count']
+}).catch(() => {
+  router.push({ name: 'NetworkError' })
+})
 
 onBeforeRouteUpdate((to, from, next) => {
   const toPage = Number(to.query.page)
-  EventService.getEvent(2, toPage)
-    .then((response: AxiosResponse<EventItem[]>) => {
-      events.value = response.data
-      totalEvent.value = response.headers['x-total-count']
-      next()
-    })
-    .catch(() => {
-      next({ name: 'NetworkError' })
-    })
+  EventService.getEvent(2, toPage).then((response: AxiosResponse<EventItem[]>) => {
+    events.value = response.data
+    totalEvent.value = response.headers['x-total-count']
+    next()
+  }).catch(() => {
+    next({ name: 'NetworkError' })
+  })
 })
 
 const hasNextPage = computed(() => {
